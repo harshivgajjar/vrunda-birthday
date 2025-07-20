@@ -164,6 +164,15 @@ function setupEventListeners() {
             }
         });
         
+        // Auto-close sidebar when clicking on navigation links
+        const navLinks = document.querySelectorAll('.nav-item');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                console.log('Sidebar auto-closed after navigation');
+            });
+        });
+        
         console.log('Mobile menu toggle listener added');
     }
     
@@ -210,10 +219,31 @@ function setupEventListeners() {
         console.log('Sort filter not found');
     }
     
-    // Random memory button
+    // Random memory button with mobile shortcuts
     if (randomMemoryBtn) {
-        randomMemoryBtn.addEventListener('click', showRandomMemory);
-        console.log('Random memory button listener added');
+        let touchCount = 0;
+        let touchTimer = null;
+        
+        randomMemoryBtn.addEventListener('click', (e) => {
+            touchCount++;
+            
+            if (touchCount === 1) {
+                // First tap - show random memory
+                showRandomMemory();
+                
+                // Set timer for second tap
+                touchTimer = setTimeout(() => {
+                    touchCount = 0;
+                }, 2000);
+            } else if (touchCount === 2) {
+                // Second tap within 2 seconds - show mobile shortcuts
+                clearTimeout(touchTimer);
+                touchCount = 0;
+                showMobileShortcuts();
+            }
+        });
+        
+        console.log('Random memory button with mobile shortcuts listener added');
     } else {
         console.log('Random memory button not found');
     }
@@ -440,9 +470,13 @@ function applyFilters() {
         return matchesSearch && matchesYear && matchesMonth && matchesDate;
     });
     
-    // Sort messages
-    if (sortOrder === 'descending') {
-        filteredData.reverse();
+    // Sort messages properly
+    if (sortOrder === 'oldest') {
+        // Keep original order (oldest first)
+        filteredData = [...filteredData];
+    } else if (sortOrder === 'newest') {
+        // Reverse to show newest first
+        filteredData = [...filteredData].reverse();
     }
     
     displayMessages(filteredData);
@@ -939,168 +973,115 @@ function showNineNineMessage() {
 
 // Real Brooklyn Nine-Nine Quotes Database
 const b99Quotes = {
-    holt: [
-        { quote: "BONE?!", emoji: "🦴" },
-        { quote: "VINDICATION!", emoji: "✨" },
-        { quote: "HOT DAMN!", emoji: "🔥" },
-        { quote: "BOOOOOOONE?!", emoji: "🦴" },
-        { quote: "WUNCH TIME IS OVER!", emoji: "⏰" },
-        { quote: "I AM YOUR SUPERIOR OFFICER!", emoji: "👔" },
-        { quote: "YAS QUEEN!", emoji: "👑" },
-        { quote: "BINGPOT!", emoji: "🎯" },
-        { quote: "I'M A HUMAN. I'M A HUMAN MALE.", emoji: "👨" },
-        { quote: "EVERY TIME SOMEONE STEPS UP AND SAYS WHO THEY ARE, THE WORLD BECOMES A BETTER, MORE INTERESTING PLACE.", emoji: "🌈" },
-        { quote: "I'M TOO OLD TO BE A 43!", emoji: "👴" },
-        { quote: "I'M A GENIUS. I'M A GENIUS. I'M A GENIUS.", emoji: "🧠" }
-    ],
     jake: [
-        { quote: "COOL COOL COOL COOL COOL!", emoji: "😎" },
-        { quote: "NO DOUBT NO DOUBT!", emoji: "👍" },
-        { quote: "TITLE OF YOUR SEX TAPE!", emoji: "📹" },
-        { quote: "I'M TOO YOUNG TO DIE!", emoji: "💀" },
-        { quote: "OH DAMN! OH DAMN! OH DAMN!", emoji: "😱" },
-        { quote: "I'M THE HUMAN FORM OF THE 100 EMOJI!", emoji: "💯" },
-        { quote: "I'M A GENIUS!", emoji: "🧠" },
-        { quote: "I'M A DETECTIVE!", emoji: "🔍" },
-        { quote: "I'M A COP!", emoji: "👮" },
-        { quote: "I'M A HERO!", emoji: "🦸" },
-        { quote: "I'M A LEGEND!", emoji: "🌟" },
-        { quote: "I'M A STAR!", emoji: "⭐" },
-        { quote: "I'M A BADASS!", emoji: "💪" },
-        { quote: "I'M A WINNER!", emoji: "🏆" },
-        { quote: "I'M A CHAMPION!", emoji: "🥇" },
-        { quote: "I'M THE BEST!", emoji: "👑" },
-        { quote: "I'M A LEADER!", emoji: "🎖️" },
-        { quote: "I'M A WARRIOR!", emoji: "⚔️" },
-        { quote: "I'M A PROTECTOR!", emoji: "🛡️" },
-        { quote: "I'M A GUARDIAN!", emoji: "🦸‍♂️" },
-        { quote: "I'M A SAVIOR!", emoji: "🦸‍♂️" },
-        { quote: "I'M A LEGENDARY DETECTIVE!", emoji: "🔍" },
-        { quote: "I'M THE GREATEST COP EVER!", emoji: "👮‍♂️" }
+        { quote: "Cool cool cool cool cool, no doubt no doubt no doubt.", emoji: "🕶️" },
+        { quote: "Noice. Smort.", emoji: "🕶️" },
+        { quote: "I'm the human form of the 💯 emoji.", emoji: "🕶️" },
+        { quote: "Bingpot!", emoji: "🕶️" },
+        { quote: "Title of your sex tape.", emoji: "🕶️" },
+        { quote: "Sarge, with all due respect, I am gonna completely ignore everything you just said.", emoji: "🕶️" },
+        { quote: "I wasn't hurt that badly. The doctor said all my bleeding was internal. That's where the blood's supposed to be!", emoji: "🕶️" },
+        { quote: "I've only had Arlo for a day and a half, but if anything happened to him I would kill everyone in this room and then myself.", emoji: "🕶️" },
+        { quote: "Hope is for losers. I make my own luck.", emoji: "🕶️" },
+        { quote: "The English language cannot fully capture the depth and complexity of my thoughts, so I'm incorporating emojis into my speech to better express myself. Winky face.", emoji: "🕶️" },
+        { quote: "My entire life is a lie. My hair—this is a wig! I'm bald.", emoji: "🕶️" },
+        { quote: "You think I'm not tough? I grew up on the streets of suburban Queens, man!", emoji: "🕶️" },
+        { quote: "Let's just say it involved three double cheeseburgers and a lot of regret.", emoji: "🕶️" },
+        { quote: "I want it to be fun and cool, like one of those slow-motion scenes where we walk away from an explosion and don't look back.", emoji: "🕶️" }
     ],
-    amy: [
-        { quote: "I'M A COMPLETE FREAK!", emoji: "📚" },
-        { quote: "I LOVE RULES!", emoji: "📋" },
-        { quote: "I'M A TOTAL FREAK!", emoji: "📖" },
-        { quote: "I LOVE ORGANIZATION!", emoji: "📁" },
-        { quote: "I LOVE BINDERS!", emoji: "📒" },
-        { quote: "I LOVE PLANNING!", emoji: "📅" },
-        { quote: "I LOVE SCHEDULES!", emoji: "⏰" },
-        { quote: "I LOVE LISTS!", emoji: "📝" },
-        { quote: "I LOVE ORGANIZING!", emoji: "🗂️" },
-        { quote: "I LOVE EFFICIENCY!", emoji: "⚡" },
-        { quote: "I'M A FREAK!", emoji: "📚" },
-        { quote: "I LOVE BEING A FREAK!", emoji: "📖" },
-        { quote: "I'M A TOTAL FREAK!", emoji: "📋" },
-        { quote: "I LOVE BEING ORGANIZED!", emoji: "📁" },
-        { quote: "I LOVE BEING EFFICIENT!", emoji: "⚡" },
-        { quote: "I LOVE BEING PRECISE!", emoji: "🎯" },
-        { quote: "I LOVE BEING ACCURATE!", emoji: "🎯" },
-        { quote: "I LOVE BEING THOROUGH!", emoji: "🔍" },
-        { quote: "I LOVE BEING DETAILED!", emoji: "📋" },
-        { quote: "I LOVE BEING SYSTEMATIC!", emoji: "⚙️" },
-        { quote: "I LOVE BEING METHODICAL!", emoji: "🔬" },
-        { quote: "I LOVE BEING STRUCTURED!", emoji: "🏗️" },
-        { quote: "I LOVE BEING ORDERLY!", emoji: "📦" },
-        { quote: "I LOVE BEING DISCIPLINED!", emoji: "🎯" }
-    ],
-    rosa: [
-        { quote: "I'M A SAVAGE!", emoji: "😠" },
-        { quote: "I'M A BADASS!", emoji: "💪" },
-        { quote: "I'M A WARRIOR!", emoji: "⚔️" },
-        { quote: "I'M A FIGHTER!", emoji: "🥊" },
-        { quote: "I'M A KILLER!", emoji: "🗡️" },
-        { quote: "I'M A BEAST!", emoji: "🦁" },
-        { quote: "I'M A MONSTER!", emoji: "👹" },
-        { quote: "I'M A DEMON!", emoji: "😈" },
-        { quote: "I'M A SHARK!", emoji: "🦈" },
-        { quote: "I'M A TIGER!", emoji: "🐯" },
-        { quote: "I'M A WOLF!", emoji: "🐺" },
-        { quote: "I'M A DRAGON!", emoji: "🐉" },
-        { quote: "I'M A PHOENIX!", emoji: "🔥" },
-        { quote: "I'M A VAMPIRE!", emoji: "🧛‍♀️" },
-        { quote: "I'M A WITCH!", emoji: "🧙‍♀️" },
-        { quote: "I'M A SORCERESS!", emoji: "🔮" },
-        { quote: "I'M A NECROMANCER!", emoji: "💀" },
-        { quote: "I'M A DARK LORD!", emoji: "👑" },
-        { quote: "I'M A SHADOW!", emoji: "👤" },
-        { quote: "I'M A GHOST!", emoji: "👻" },
-        { quote: "I'M A SPIRIT!", emoji: "👻" },
-        { quote: "I'M A LEGEND!", emoji: "🌟" }
+    holt: [
+        { quote: "Everything is garbage.", emoji: "🧊" },
+        { quote: "Hot damn.", emoji: "🧊" },
+        { quote: "Wuntch time is over.", emoji: "🧊" },
+        { quote: "You're a good detective, but an even better husband.", emoji: "🧊" },
+        { quote: "BONE?! I HAVE NO BONES TO PICK.", emoji: "🧊" },
+        { quote: "This folder is now my husband.", emoji: "🧊" },
+        { quote: "This is a police precinct, not a canvas for your emo poetry.", emoji: "🧊" },
+        { quote: "I'm ecstatic.", emoji: "🧊" },
+        { quote: "You want my respect? Then earn it.", emoji: "🧊" },
+        { quote: "Pain. That's it. Just pain.", emoji: "🧊" },
+        { quote: "I'm not mad. I'm just disappointed… in everything.", emoji: "🧊" },
+        { quote: "I was a damn good cop. And I will not let you or anyone else take that away from me.", emoji: "🧊" },
+        { quote: "You know what they say: 'Fool me once, strike one. But fool me twice… strike three.'", emoji: "🧊" },
+        { quote: "Why would I ever do something nice? I'm vindictive and petty.", emoji: "🧊" },
+        { quote: "Yes, I do support the Make-A-Wish Foundation. I'm not a monster.", emoji: "🧊" }
     ],
     terry: [
-        { quote: "TERRY LOVES LOVE!", emoji: "💕" },
-        { quote: "TERRY LOVES YOGURT!", emoji: "🥛" },
-        { quote: "TERRY LOVES HIS KIDS!", emoji: "👶" },
-        { quote: "TERRY LOVES WORKING OUT!", emoji: "🏋️" },
-        { quote: "TERRY LOVES HIS FAMILY!", emoji: "👨‍👩‍👧‍👦" },
-        { quote: "TERRY LOVES BEING A DAD!", emoji: "👨‍👧‍👦" },
-        { quote: "TERRY LOVES HIS WIFE!", emoji: "💍" },
-        { quote: "TERRY LOVES HIS JOB!", emoji: "💼" },
-        { quote: "TERRY LOVES HIS FRIENDS!", emoji: "🤗" },
-        { quote: "TERRY LOVES HIS LIFE!", emoji: "❤️" },
-        { quote: "TERRY LOVES EVERYTHING!", emoji: "🎉" },
-        { quote: "TERRY LOVES BEING TERRY!", emoji: "💪" },
-        { quote: "TERRY LOVES MUSCLE!", emoji: "💪" },
-        { quote: "TERRY LOVES STRENGTH!", emoji: "🏋️‍♂️" },
-        { quote: "TERRY LOVES POWER!", emoji: "⚡" },
-        { quote: "TERRY LOVES ENERGY!", emoji: "🔋" },
-        { quote: "TERRY LOVES VITALITY!", emoji: "💪" },
-        { quote: "TERRY LOVES HEALTH!", emoji: "🏥" },
-        { quote: "TERRY LOVES FITNESS!", emoji: "🏃‍♂️" },
-        { quote: "TERRY LOVES NUTRITION!", emoji: "🥗" },
-        { quote: "TERRY LOVES WELLNESS!", emoji: "🧘‍♂️" },
-        { quote: "TERRY LOVES BALANCE!", emoji: "⚖️" },
-        { quote: "TERRY LOVES HARMONY!", emoji: "🎵" }
+        { quote: "Terry loves yogurt!", emoji: "💪" },
+        { quote: "Terry is a beautiful mystery.", emoji: "💪" },
+        { quote: "Terry hates rats. And irony.", emoji: "💪" },
+        { quote: "Terry's not dying here. Terry's getting his girls through college!", emoji: "💪" },
+        { quote: "Terry's muscles don't get sore. They get bored.", emoji: "💪" },
+        { quote: "I was scared… but I never want my girls to be ashamed of who they are.", emoji: "💪" },
+        { quote: "Terry does love a good fairy tale.", emoji: "💪" },
+        { quote: "I'm a detective sergeant. I'm gonna detect and serge.", emoji: "💪" },
+        { quote: "Terry don't do paper trails!", emoji: "💪" },
+        { quote: "You mess with the bull, you get the horns!", emoji: "💪" },
+        { quote: "Terry had nightmares for a month after seeing Ghostbusters.", emoji: "💪" },
+        { quote: "Terry will find you. Terry always finds you.", emoji: "💪" },
+        { quote: "Terry loves love.", emoji: "💪" }
     ],
-    gina: [
-        { quote: "I'M BASICALLY A CELEBRITY!", emoji: "✨" },
-        { quote: "I'M BASICALLY A GENIUS!", emoji: "🧠" },
-        { quote: "I'M BASICALLY A QUEEN!", emoji: "👑" },
-        { quote: "I'M BASICALLY A LEGEND!", emoji: "🌟" },
-        { quote: "I'M BASICALLY A STAR!", emoji: "⭐" },
-        { quote: "I'M BASICALLY A GODDESS!", emoji: "👸" },
-        { quote: "I'M BASICALLY A DIVA!", emoji: "💅" },
-        { quote: "I'M BASICALLY A BOSS!", emoji: "👔" },
-        { quote: "I'M BASICALLY A HERO!", emoji: "🦸‍♀️" },
-        { quote: "I'M BASICALLY A WINNER!", emoji: "🏆" },
-        { quote: "I'M BASICALLY A CHAMPION!", emoji: "🥇" },
-        { quote: "I'M BASICALLY THE BEST!", emoji: "👑" },
-        { quote: "I'M BASICALLY A LEADER!", emoji: "🎖️" },
-        { quote: "I'M BASICALLY A PIONEER!", emoji: "🚀" },
-        { quote: "I'M BASICALLY A TRAILBLAZER!", emoji: "🔥" },
-        { quote: "I'M BASICALLY A REVOLUTIONARY!", emoji: "⚡" },
-        { quote: "I'M BASICALLY A VISIONARY!", emoji: "🔮" },
-        { quote: "I'M BASICALLY A MASTERMIND!", emoji: "🧠" },
-        { quote: "I'M BASICALLY A STRATEGIST!", emoji: "🎯" },
-        { quote: "I'M BASICALLY A TACTICIAN!", emoji: "⚔️" },
-        { quote: "I'M BASICALLY A COMMANDER!", emoji: "🎖️" },
-        { quote: "I'M BASICALLY A DIRECTOR!", emoji: "🎬" }
+    rosa: [
+        { quote: "If you tell anyone I said this, I'll deny it and destroy you.", emoji: "💅" },
+        { quote: "I hate small talk. Let's drink in silence.", emoji: "💅" },
+        { quote: "I don't like feelings. I'm a stone-cold bitch.", emoji: "💅" },
+        { quote: "Don't worry, I only threatened to kill him. I didn't do it… yet.", emoji: "💅" },
+        { quote: "Cool motive. Still murder.", emoji: "💅" },
+        { quote: "People are so clingy. I once broke up with a guy via text and he called me.", emoji: "💅" },
+        { quote: "My whole life is a dark room.", emoji: "💅" },
+        { quote: "I wasn't hurt, just lightly stabbed.", emoji: "💅" },
+        { quote: "Do I not look intimidating enough? Should I sit in a chair backwards and threaten you with a switchblade?", emoji: "💅" },
+        { quote: "You're all my best friends. Don't make a big deal out of it.", emoji: "💅" },
+        { quote: "I don't have a 'soft side.'", emoji: "💅" },
+        { quote: "Feelings are dumb. Love is cursed.", emoji: "💅" },
+        { quote: "Do I not look intimidating enough?", emoji: "💅" }
+    ],
+    amy: [
+        { quote: "I have seven planners. Each planner contains a schedule, a goal tracker, a to-do list…", emoji: "🎨" },
+        { quote: "Oh, it is on like Donkey Kong. Which I know is a video game, don't quiz me on it!", emoji: "🎨" },
+        { quote: "I'm gonna go cry in the bathroom. Peace out, homies.", emoji: "🎨" },
+        { quote: "You read my dream journal?! That is private!", emoji: "🎨" },
+        { quote: "My doctor said my blood pressure is 'pre-hypertension.' So it's basically fine.", emoji: "🎨" },
+        { quote: "Binders are sacred.", emoji: "🎨" },
+        { quote: "I can't be spontaneous. I once threw out a spontaneous purchase planner.", emoji: "🎨" },
+        { quote: "Do you know how many germs are in the average elevator button? Don't touch me.", emoji: "🎨" },
+        { quote: "I can't go to jail! I'll die. They'll eat me alive!", emoji: "🎨" },
+        { quote: "I love puzzles, I love logic, I love being right, I love lists!", emoji: "🎨" },
+        { quote: "I have seven planners.", emoji: "🎨" },
+        { quote: "You read my dream journal?!", emoji: "🎨" },
+        { quote: "I got into the academy because of hard work, not because of some famous relative.", emoji: "🎨" },
+        { quote: "Oh, it is on like Donkey Kong. Which I know is a video game—don't quiz me on it!", emoji: "🎨" }
     ],
     boyle: [
-        { quote: "I LOVE FOOD!", emoji: "🍕" },
-        { quote: "I LOVE COOKING!", emoji: "👨‍🍳" },
-        { quote: "I LOVE MY FRIENDS!", emoji: "🤗" },
-        { quote: "I LOVE BEING A DETECTIVE!", emoji: "🔍" },
-        { quote: "I LOVE MY JOB!", emoji: "💼" },
-        { quote: "I LOVE EVERYTHING!", emoji: "❤️" },
-        { quote: "I LOVE JAKE!", emoji: "😍" },
-        { quote: "I LOVE THE 99TH PRECINCT!", emoji: "🚔" },
-        { quote: "I LOVE BEING A COP!", emoji: "👮" },
-        { quote: "I LOVE HELPING PEOPLE!", emoji: "🤝" },
-        { quote: "I LOVE MY LIFE!", emoji: "🎉" },
-        { quote: "I LOVE BEING CHARLES!", emoji: "🥪" },
-        { quote: "I LOVE RECIPES!", emoji: "📖" },
-        { quote: "I LOVE INGREDIENTS!", emoji: "🥕" },
-        { quote: "I LOVE FLAVORS!", emoji: "👅" },
-        { quote: "I LOVE AROMAS!", emoji: "👃" },
-        { quote: "I LOVE TEXTURES!", emoji: "🤲" },
-        { quote: "I LOVE PRESENTATION!", emoji: "🍽️" },
-        { quote: "I LOVE GARNISHES!", emoji: "🌿" },
-        { quote: "I LOVE SEASONINGS!", emoji: "🧂" },
-        { quote: "I LOVE SPICES!", emoji: "🌶️" },
-        { quote: "I LOVE HERBS!", emoji: "🌱" },
-        { quote: "I LOVE CULINARY ARTS!", emoji: "🎨" }
+        { quote: "Jake and I are like Batman and Robin, if Batman had a food blog and Robin was super into jiu-jitsu.", emoji: "🍩" },
+        { quote: "You're the cream in my coffee, the butter on my biscuit.", emoji: "🍩" },
+        { quote: "I have a name for every emotion. For example, I'm feeling glumpish right now.", emoji: "🍩" },
+        { quote: "You think I'm sweet? You should see me with my dogs!", emoji: "🍩" },
+        { quote: "Boyle's got the moves. Boyle's got the power.", emoji: "🍩" },
+        { quote: "It's okay. I'm a Boyle. Pain is just the family curse.", emoji: "🍩" },
+        { quote: "I tried to hide a meatball in my pants once.", emoji: "🍩" },
+        { quote: "We're foodies, Jake. We need sustenance, not sustenance.", emoji: "🍩" },
+        { quote: "Every time you talk about Amy, I hear this weird sound: 'doo-wop doo-wop.'", emoji: "🍩" },
+        { quote: "What happens in Boyletown, stays in Boyletown.", emoji: "🍩" },
+        { quote: "Jake and I are like Batman and Robin. If Batman had a food blog.", emoji: "🍩" },
+        { quote: "The Vulture swooped in and stole my case… like a vulture!", emoji: "🍩" },
+        { quote: "I have a name for every emotion.", emoji: "🍩" },
+        { quote: "Don't worry Jake. I'd never let anything bad happen to you… unless it was funny.", emoji: "🍩" }
+    ],
+    gina: [
+        { quote: "The English language cannot fully capture the depth and complexity of my thoughts, so I'm incorporating emojis into my speech.", emoji: "😬" },
+        { quote: "The only thing I'm not good at is modesty. Because I'm great at it.", emoji: "😬" },
+        { quote: "I'm the Paris of people.", emoji: "😬" },
+        { quote: "Time is a construct.", emoji: "😬" },
+        { quote: "The vibes are off. I'm out.", emoji: "😬" },
+        { quote: "I don't have emotions. I'm a robot programmed to be sassy and love dance.", emoji: "😬" },
+        { quote: "I'm gonna go sit in a corner and read the comments on my own Instagram.", emoji: "😬" },
+        { quote: "I'm the human form of the 💅 emoji.", emoji: "😬" },
+        { quote: "Confidence. I can't teach it. But I live it. I breathe it. I exude it.", emoji: "😬" },
+        { quote: "You can't put a label on me. I'm not a label. I'm a person. And my label is Gina.", emoji: "😬" },
+        { quote: "The vibes are off. I'm out.", emoji: "😬" },
+        { quote: "Confidence. I can't teach it. But I live it.", emoji: "😬" },
+        { quote: "The English language can't fully capture the depth of my thoughts, so I'm switching to emojis.", emoji: "😬" }
     ]
 };
 
@@ -1285,12 +1266,27 @@ function showKeyboardShortcuts() {
         { key: 'L', description: 'Go to Timeline', icon: '📅' }
     ];
     
+    const mobileShortcuts = [
+        { icon: '🚔', description: 'Toggle B99 Theme', action: 'Tap Random Memory + B99' },
+        { icon: '🎉', description: 'Nine-Nine!', action: 'Tap Random Memory + Nine-Nine' },
+        { icon: '👨‍💼', description: 'Captain Holt Quotes', action: 'Tap Random Memory + Holt' },
+        { icon: '😎', description: 'Jake Peralta Quotes', action: 'Tap Random Memory + Jake' },
+        { icon: '📚', description: 'Amy Santiago Quotes', action: 'Tap Random Memory + Amy' },
+        { icon: '😠', description: 'Rosa Diaz Quotes', action: 'Tap Random Memory + Rosa' },
+        { icon: '💪', description: 'Terry Jeffords Quotes', action: 'Tap Random Memory + Terry' },
+        { icon: '💅', description: 'Gina Linetti Quotes', action: 'Tap Random Memory + Gina' },
+        { icon: '🥪', description: 'Charles Boyle Quotes', action: 'Tap Random Memory + Boyle' }
+    ];
+    
     let modalContent = `
         <div class="shortcuts-header">
-            <h3>🚔 Brooklyn Nine-Nine Keyboard Shortcuts ⌨️</h3>
-            <p>Press these keys to activate special B99 features!</p>
+            <h3>🚔 Brooklyn Nine-Nine Shortcuts ⌨️</h3>
+            <p>Use keyboard shortcuts on desktop or tap combinations on mobile!</p>
         </div>
-        <div class="shortcuts-grid">
+        
+        <div class="shortcuts-section">
+            <h4>💻 Desktop Keyboard Shortcuts:</h4>
+            <div class="shortcuts-grid">
     `;
     
     shortcuts.forEach(shortcut => {
@@ -1303,39 +1299,103 @@ function showKeyboardShortcuts() {
     });
     
     modalContent += `
+            </div>
         </div>
+        
+        <div class="shortcuts-section">
+            <h4>📱 Mobile Touch Shortcuts:</h4>
+            <div class="shortcuts-grid mobile-shortcuts">
+    `;
+    
+    mobileShortcuts.forEach(shortcut => {
+        modalContent += `
+            <div class="shortcut-item mobile">
+                <div class="shortcut-icon">${shortcut.icon}</div>
+                <div class="shortcut-desc">
+                    <div class="shortcut-title">${shortcut.description}</div>
+                    <div class="shortcut-action">${shortcut.action}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    modalContent += `
+            </div>
+        </div>
+        
         <div class="quotes-preview">
             <h4>🎭 Real B99 Quotes Preview:</h4>
             <div class="quotes-list">
                 <div class="quote-item">
-                    <strong>Captain Holt:</strong> "BONE?!", "VINDICATION!", "HOT DAMN!", "BINGPOT!", "YAS QUEEN!"
+                    <strong>Captain Holt:</strong> "Everything is garbage.", "Hot damn.", "Wuntch time is over."
                 </div>
                 <div class="quote-item">
-                    <strong>Jake Peralta:</strong> "COOL COOL COOL!", "NO DOUBT!", "TITLE OF YOUR SEX TAPE!", "I'M THE GREATEST COP EVER!"
+                    <strong>Jake Peralta:</strong> "Cool cool cool cool cool, no doubt no doubt no doubt.", "Bingpot!", "Title of your sex tape."
                 </div>
                 <div class="quote-item">
-                    <strong>Amy Santiago:</strong> "I'M A COMPLETE FREAK!", "I LOVE RULES!", "I LOVE ORGANIZATION!", "I LOVE PRECISION!"
+                    <strong>Amy Santiago:</strong> "I have seven planners.", "Binders are sacred.", "I love puzzles, I love logic, I love being right, I love lists!"
                 </div>
                 <div class="quote-item">
-                    <strong>Rosa Diaz:</strong> "I'M A SAVAGE!", "I'M A BADASS!", "I'M A WARRIOR!", "I'M A DRAGON!"
+                    <strong>Rosa Diaz:</strong> "Cool motive. Still murder.", "My whole life is a dark room.", "I wasn't hurt, just lightly stabbed."
                 </div>
                 <div class="quote-item">
-                    <strong>Terry Jeffords:</strong> "TERRY LOVES LOVE!", "TERRY LOVES YOGURT!", "TERRY LOVES HIS KIDS!", "TERRY LOVES FITNESS!"
+                    <strong>Terry Jeffords:</strong> "Terry loves yogurt!", "Terry's muscles don't get sore. They get bored.", "You mess with the bull, you get the horns!"
                 </div>
                 <div class="quote-item">
-                    <strong>Gina Linetti:</strong> "I'M BASICALLY A CELEBRITY!", "I'M BASICALLY A GENIUS!", "I'M BASICALLY A QUEEN!", "I'M BASICALLY A VISIONARY!"
+                    <strong>Gina Linetti:</strong> "I'm the Paris of people.", "Time is a construct.", "The vibes are off. I'm out."
                 </div>
                 <div class="quote-item">
-                    <strong>Charles Boyle:</strong> "I LOVE FOOD!", "I LOVE COOKING!", "I LOVE MY FRIENDS!", "I LOVE CULINARY ARTS!"
+                    <strong>Charles Boyle:</strong> "Jake and I are like Batman and Robin.", "You're the cream in my coffee, the butter on my biscuit.", "What happens in Boyletown, stays in Boyletown."
                 </div>
             </div>
         </div>
         <div class="shortcuts-footer">
-            <p>🎭 Each character now has 24 unique quotes that rotate in order! 🚔</p>
+            <p>🎭 Each character now has 13-15 unique authentic quotes that rotate in order! 🚔</p>
         </div>
     `;
     
     showModal('Keyboard Shortcuts', modalContent);
+}
+
+// Show mobile shortcuts panel
+function showMobileShortcuts() {
+    const shortcuts = [
+        { icon: '🚔', description: 'Toggle B99 Theme', action: () => showB99Message() },
+        { icon: '🎉', description: 'Nine-Nine!', action: () => showNineNineMessage() },
+        { icon: '👨‍💼', description: 'Captain Holt', action: () => showCaptainHoltMessage() },
+        { icon: '😎', description: 'Jake Peralta', action: () => showJakePeraltaMessage() },
+        { icon: '📚', description: 'Amy Santiago', action: () => showAmySantiagoMessage() },
+        { icon: '😠', description: 'Rosa Diaz', action: () => showRosaDiazMessage() },
+        { icon: '💪', description: 'Terry Jeffords', action: () => showTerryJeffordsMessage() },
+        { icon: '💅', description: 'Gina Linetti', action: () => showGinaLinettiMessage() },
+        { icon: '🥪', description: 'Charles Boyle', action: () => showCharlesBoyleMessage() }
+    ];
+    
+    let modalContent = `
+        <div class="mobile-shortcuts-header">
+            <h3>📱 Mobile B99 Shortcuts</h3>
+            <p>Tap any character to hear their quote!</p>
+        </div>
+        <div class="mobile-shortcuts-grid">
+    `;
+    
+    shortcuts.forEach(shortcut => {
+        modalContent += `
+            <button class="mobile-shortcut-btn" onclick="this.closest('.modal').remove(); ${shortcut.action.toString()}()">
+                <div class="shortcut-icon">${shortcut.icon}</div>
+                <div class="shortcut-label">${shortcut.description}</div>
+            </button>
+        `;
+    });
+    
+    modalContent += `
+        </div>
+        <div class="mobile-shortcuts-footer">
+            <p>💡 Double-tap Random Memory to open this panel anytime!</p>
+        </div>
+    `;
+    
+    showModal('Mobile Shortcuts', modalContent);
 }
 
 // Show modal with custom content

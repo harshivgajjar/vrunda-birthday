@@ -1,0 +1,32 @@
+[
+  {
+    "text": "hi",
+    "sender": "Harshiv Gajjar",
+    "timestamp": "Friday, July 7, 2017 at 3:27:25 PM UTC",
+    "is_vrunda": false
+  },
+  {
+    "text": "Hello! How are you?",
+    "sender": "Vrunda",
+    "timestamp": "Friday, July 7, 2017 at 3:28:00 PM UTC",
+    "is_vrunda": true
+  },
+  {
+    "text": "I'm good, thanks!",
+    "sender": "Harshiv Gajjar",
+    "timestamp": "Friday, July 7, 2017 at 3:29:00 PM UTC",
+    "is_vrunda": false
+  },
+  {
+    "text": "That's great to hear!",
+    "sender": "Vrunda",
+    "timestamp": "Friday, July 7, 2017 at 3:30:00 PM UTC",
+    "is_vrunda": true
+  },
+  {
+    "text": "Happy Birthday Vrunda! 🎉",
+    "sender": "Friend",
+    "timestamp": "Saturday, July 8, 2017 at 10:00:00 AM UTC",
+    "is_vrunda": false
+  }
+] 
