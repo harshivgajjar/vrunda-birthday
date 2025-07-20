@@ -1,0 +1,22 @@
+# Large chat data files
+extracted_chats/
+*.zip
+
+# Keep only the main chat file
+!vrunda_chats.json
+!test_chats.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp 
