@@ -7,19 +7,37 @@ let selectedRandomMessage = null;
 // Login/authentication logic
 let isAuthenticated = false;
 
+// Get the base URL for API calls
+function getApiBaseUrl() {
+    const currentOrigin = window.location.origin;
+    // If we're on localhost with a different port, point to the backend port
+    if (currentOrigin.includes('localhost') && !currentOrigin.includes(':5000')) {
+        return 'http://localhost:5000';
+    }
+    return currentOrigin;
+}
+
+// Check authentication status
 async function checkAuth() {
     try {
-        // Use the current domain for API calls (works for both localhost and production)
-        const baseUrl = window.location.origin;
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/api/check-auth`, {
             credentials: 'include'
         });
-        const data = await res.json();
-        isAuthenticated = data.authenticated;
-        return isAuthenticated;
-    } catch (e) {
-        isAuthenticated = false;
-        return false;
+        if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated) {
+                isAuthenticated = true;
+                showAuthenticatedContent();
+            } else {
+                showLoginModal();
+            }
+        } else {
+            showLoginModal();
+        }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        showLoginModal();
     }
 }
 
@@ -43,7 +61,7 @@ if (loginForm) {
         const errorDiv = document.getElementById('login-error');
         errorDiv.style.display = 'none';
         try {
-            const baseUrl = window.location.origin;
+            const baseUrl = getApiBaseUrl();
             const res = await fetch(`${baseUrl}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1584,7 +1602,7 @@ async function loadPhotosGallery() {
         console.log('Attempting to fetch real photos from Google Photos album...');
         
         // First, try to scrape the actual Google Photos album
-        const baseUrl = window.location.origin;
+        const baseUrl = getApiBaseUrl();
         let response = await fetch(`${baseUrl}/api/photos/scrape`, {
             method: 'GET',
             credentials: 'include',

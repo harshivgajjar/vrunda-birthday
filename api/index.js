@@ -1,3 +1,10 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
+// Debug: Check if environment variables are loaded
+console.log('MONGO_URI exists:', !!process.env.MONGO_URI);
+console.log('SESSION_SECRET exists:', !!process.env.SESSION_SECRET);
+
 // Vercel serverless function handler
 const express = require('express');
 const mongoose = require('mongoose');
@@ -28,15 +35,28 @@ app.use(session({
     }
 }));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB only if MONGO_URI is available
+let mongoConnected = false;
+if (process.env.MONGO_URI) {
+    mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).then(() => {
+        console.log('MongoDB connected');
+        mongoConnected = true;
+        ensureDefaultUser();
+    }).catch(err => {
+        console.error('MongoDB connection error:', err);
+        mongoConnected = false;
+    });
+} else {
+    console.log('MONGO_URI not found, running without database');
+    mongoConnected = false;
+}
 
 // Create default user if not exists
 async function ensureDefaultUser() {
+    if (!mongoConnected) return;
     try {
         const user = await User.findOne({ username: 'vuvu' });
         if (!user) {
@@ -52,6 +72,10 @@ async function ensureDefaultUser() {
 // Auth routes
 app.post('/api/login', async (req, res) => {
     try {
+        if (!mongoConnected) {
+            return res.status(500).json({ message: 'Database not connected. Please check your MONGO_URI environment variable.' });
+        }
+        
         const { username, password } = req.body;
         const user = await User.findOne({ username });
         if (!user) return res.status(401).json({ message: 'Invalid credentials' });
@@ -61,7 +85,7 @@ app.post('/api/login', async (req, res) => {
         res.json({ message: 'Login successful' });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error: ' + error.message });
     }
 });
 
@@ -235,7 +259,9 @@ app.get('/api/photos/scrape', async (req, res) => {
 });
 
 // Initialize default user
-ensureDefaultUser();
+if (mongoConnected) {
+    ensureDefaultUser();
+}
 
 // Export for Vercel
 module.exports = app; 
