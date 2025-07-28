@@ -4,6 +4,118 @@ let filteredData = [];
 let currentView = 'timeline';
 let selectedRandomMessage = null;
 
+// Login/authentication logic
+let isAuthenticated = false;
+
+async function checkAuth() {
+    try {
+        const res = await fetch('http://localhost:5000/api/check-auth', {
+            credentials: 'include'
+        });
+        const data = await res.json();
+        isAuthenticated = data.authenticated;
+        return isAuthenticated;
+    } catch (e) {
+        isAuthenticated = false;
+        return false;
+    }
+}
+
+function showLoginModal() {
+    const loginModal = document.getElementById('login-modal');
+    if (loginModal) loginModal.style.display = 'flex';
+}
+
+function hideLoginModal() {
+    const loginModal = document.getElementById('login-modal');
+    if (loginModal) loginModal.style.display = 'none';
+}
+
+// Handle login form submit
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        const errorDiv = document.getElementById('login-error');
+        errorDiv.style.display = 'none';
+        try {
+            const res = await fetch('http://localhost:5000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                errorDiv.textContent = data.message || 'Login failed';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            hideLoginModal();
+            isAuthenticated = true;
+            document.querySelector('.main-content').style.display = '';
+            document.querySelector('.sidebar').style.display = '';
+            switchView('timeline');
+            
+            // Show notification that keyboard shortcuts are now enabled
+            showNotification('🎉 Keyboard shortcuts enabled! Press ⌨️ for help', 'success');
+        } catch (err) {
+            errorDiv.textContent = 'Login failed';
+            errorDiv.style.display = 'block';
+        }
+    });
+}
+
+// Define the original switchView function before any overrides
+function switchView(viewName) {
+    console.log('Switching to view:', viewName);
+    currentView = viewName;
+
+    // Update active nav item
+    navItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.view === viewName);
+    });
+
+    // Update active content section
+    contentSections.forEach(section => {
+        section.classList.toggle('active', section.id === `${viewName}-view`);
+    });
+
+    // Update page title and subtitle
+    updatePageHeader(viewName);
+
+    // Load view-specific content
+    switch(viewName) {
+        case 'timeline':
+            console.log('Displaying timeline messages...');
+            displayMessages(filteredData);
+            break;
+        case 'search':
+            // Search view is handled by its own event listeners
+            break;
+        case 'memories':
+            generateMemories();
+            break;
+    }
+}
+
+// Add the missing updatePageHeader function
+function updatePageHeader(viewName) {
+    const pageTitle = document.querySelector('.page-title');
+    const pageSubtitle = document.querySelector('.page-subtitle');
+    const titles = {
+        timeline: { title: 'Timeline', subtitle: 'Your chat journey with Vrunda' },
+        search: { title: 'Search', subtitle: 'Find specific moments in your chat history' },
+        memories: { title: 'Memories', subtitle: 'Curated moments from your chat history' }
+    };
+    if (pageTitle && pageSubtitle && titles[viewName]) {
+        pageTitle.textContent = titles[viewName].title;
+        pageSubtitle.textContent = titles[viewName].subtitle;
+    }
+}
+
 // DOM elements
 const messagesContainer = document.getElementById('messages-container');
 const searchInput = document.getElementById('search-input');
@@ -34,36 +146,7 @@ console.log('timeline-view element:', timelineView);
 console.log('timeline-view classes:', timelineView?.className);
 console.log('timeline-view display style:', timelineView?.style.display);
 
-// Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    
-    // Re-check elements after DOM is loaded
-    console.log('After DOM loaded - messagesContainer:', document.getElementById('messages-container'));
-    console.log('After DOM loaded - timeline-view:', document.getElementById('timeline-view'));
-    
-    // Show loading overlay
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'flex';
-        console.log('Loading overlay shown');
-    } else {
-        console.log('Loading overlay not found');
-    }
-    
-    // Simulate loading time for dramatic effect
-    setTimeout(() => {
-        console.log('Starting to load chat data...');
-        loadChatData();
-    }, 1500);
-    
-    setupEventListeners();
-    setupNavigation();
-    
-    // Ensure timeline view is active by default
-    switchView('timeline');
-});
-
-// Load chat data from JSON file
+// Define loadChatData before DOMContentLoaded
 async function loadChatData() {
     try {
         console.log('Fetching vrunda_chats.json...');
@@ -98,9 +181,6 @@ async function loadChatData() {
             console.log('Loading element not found');
         }
         
-        // Update stats
-        updateStats();
-        
         // Generate memories
         generateMemories();
         
@@ -134,36 +214,29 @@ async function loadChatData() {
     }
 }
 
-// Setup event listeners
+// Implement robust setupEventListeners
 function setupEventListeners() {
     console.log('Setting up event listeners...');
-    
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
     const sidebarClose = document.getElementById('sidebar-close');
-    
     if (mobileMenuToggle && sidebar) {
         mobileMenuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
             console.log('Mobile menu toggled');
         });
-        
-        // Close sidebar with close button
         if (sidebarClose) {
             sidebarClose.addEventListener('click', () => {
                 sidebar.classList.remove('open');
                 console.log('Sidebar closed with close button');
             });
         }
-        
-        // Close sidebar when clicking outside
         document.addEventListener('click', (e) => {
             if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
             }
         });
-        
         // Auto-close sidebar when clicking on navigation links
         const navLinks = document.querySelectorAll('.nav-item');
         navLinks.forEach(link => {
@@ -172,99 +245,63 @@ function setupEventListeners() {
                 console.log('Sidebar auto-closed after navigation');
             });
         });
-        
-        console.log('Mobile menu toggle listener added');
     }
-    
     // Help button
     const helpBtn = document.getElementById('help-btn');
     if (helpBtn) {
         helpBtn.addEventListener('click', showKeyboardShortcuts);
         console.log('Help button listener added');
     }
-    
     // Search functionality
     if (searchInput) {
         searchInput.addEventListener('input', debounce(handleSearch, 300));
         console.log('Search input listener added');
-    } else {
-        console.log('Search input not found');
     }
-    
     if (yearFilter) {
         yearFilter.addEventListener('change', handleFilterChange);
         console.log('Year filter listener added');
-    } else {
-        console.log('Year filter not found');
     }
-    
     if (monthFilter) {
         monthFilter.addEventListener('change', handleFilterChange);
         console.log('Month filter listener added');
-    } else {
-        console.log('Month filter not found');
     }
-    
     if (dateFilter) {
         dateFilter.addEventListener('change', handleFilterChange);
         console.log('Date filter listener added');
-    } else {
-        console.log('Date filter not found');
     }
-    
     if (sortFilter) {
         sortFilter.addEventListener('change', handleFilterChange);
         console.log('Sort filter listener added');
-    } else {
-        console.log('Sort filter not found');
     }
-    
     // Random memory button with mobile shortcuts
     if (randomMemoryBtn) {
         let touchCount = 0;
         let touchTimer = null;
-        
         randomMemoryBtn.addEventListener('click', (e) => {
             touchCount++;
-            
             if (touchCount === 1) {
-                // First tap - show random memory
                 showRandomMemory();
-                
-                // Set timer for second tap
-                touchTimer = setTimeout(() => {
-                    touchCount = 0;
-                }, 2000);
+                touchTimer = setTimeout(() => { touchCount = 0; }, 2000);
             } else if (touchCount === 2) {
-                // Second tap within 2 seconds - show mobile shortcuts
                 clearTimeout(touchTimer);
                 touchCount = 0;
                 showMobileShortcuts();
             }
         });
-        
         console.log('Random memory button with mobile shortcuts listener added');
-    } else {
-        console.log('Random memory button not found');
     }
-    
     // Modal functionality
     if (closeModal) {
         closeModal.addEventListener('click', () => modal.style.display = 'none');
         console.log('Close modal listener added');
-    } else {
-        console.log('Close modal button not found');
     }
-    
     window.addEventListener('click', (e) => {
         if (e.target === modal) modal.style.display = 'none';
     });
-    
     // Advanced search
-    const advancedSearch = document.getElementById('advanced-search');
+    const advancedSearch = document.getElementById('advanced-search-input');
     const searchBtn = document.getElementById('search-btn');
     const senderFilter = document.getElementById('sender-filter');
-    
     if (advancedSearch) {
         advancedSearch.addEventListener('input', debounce(handleAdvancedSearch, 300));
         console.log('Advanced search listener added');
@@ -277,13 +314,27 @@ function setupEventListeners() {
         senderFilter.addEventListener('change', handleAdvancedSearch);
         console.log('Sender filter listener added');
     }
+    // Keyboard shortcuts (only enabled after authentication)
+    document.addEventListener('keydown', function(e) {
+        if (!isAuthenticated) return; // Only work after login
+        
+        if (e.key.toLowerCase() === 'b') showB99Message();
+        if (e.key.toLowerCase() === 'n') showNineNineMessage();
+        if (e.key.toLowerCase() === 'h') showCaptainHoltMessage();
+        if (e.key.toLowerCase() === 'j') showJakePeraltaMessage();
+        if (e.key.toLowerCase() === 'a') showAmySantiagoMessage();
+        if (e.key.toLowerCase() === 'r') showRosaDiazMessage();
+        if (e.key.toLowerCase() === 't') showTerryJeffordsMessage();
+        if (e.key.toLowerCase() === 'g') showGinaLinettiMessage();
+        if (e.key.toLowerCase() === 'c') showCharlesBoyleMessage();
+        if (e.key.toLowerCase() === 's') showRandomMemory();
+        if (e.key.toLowerCase() === 'l') switchView('timeline');
+    });
 }
 
-// Setup navigation
+// Add setupNavigation to enable sidebar navigation
 function setupNavigation() {
     console.log('Setting up navigation...');
-    console.log('Nav items found:', navItems.length);
-    
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
@@ -294,59 +345,49 @@ function setupNavigation() {
     });
 }
 
-// Switch between views
-function switchView(viewName) {
-    console.log('Switching to view:', viewName);
-    currentView = viewName;
-    
-    // Update active nav item
-    navItems.forEach(item => {
-        item.classList.toggle('active', item.dataset.view === viewName);
-    });
-    
-    // Update active content section
-    contentSections.forEach(section => {
-        section.classList.toggle('active', section.id === `${viewName}-view`);
-    });
-    
-    // Update page title and subtitle
-    updatePageHeader(viewName);
-    
-    // Load view-specific content
-    switch(viewName) {
-        case 'timeline':
-            console.log('Displaying timeline messages...');
-            displayMessages(filteredData);
-            break;
-        case 'search':
-            // Search view is handled by its own event listeners
-            break;
-        case 'stats':
-            updateStats();
-            break;
-        case 'memories':
-            generateMemories();
-            break;
-    }
-}
+// On DOMContentLoaded, check authentication before showing any content
 
-// Update page header
-function updatePageHeader(viewName) {
-    const pageTitle = document.querySelector('.page-title');
-    const pageSubtitle = document.querySelector('.page-subtitle');
-    
-    const titles = {
-        timeline: { title: 'Timeline', subtitle: 'Your chat journey with Vrunda' },
-        search: { title: 'Search', subtitle: 'Find specific moments in your chat history' },
-        stats: { title: 'Analytics', subtitle: 'Insights from your conversation history' },
-        memories: { title: 'Memories', subtitle: 'Curated moments from your chat history' }
-    };
-    
-    if (pageTitle && pageSubtitle && titles[viewName]) {
-        pageTitle.textContent = titles[viewName].title;
-        pageSubtitle.textContent = titles[viewName].subtitle;
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM Content Loaded');
+
+    // Check authentication first
+    const authed = await checkAuth();
+    if (!authed) {
+        showLoginModal();
+        // Optionally, hide main content until login
+        document.querySelector('.main-content').style.display = 'none';
+        document.querySelector('.sidebar').style.display = 'none';
+    } else {
+        document.querySelector('.main-content').style.display = '';
+        document.querySelector('.sidebar').style.display = '';
     }
-}
+
+    // Re-check elements after DOM is loaded
+    console.log('After DOM loaded - messagesContainer:', document.getElementById('messages-container'));
+    console.log('After DOM loaded - timeline-view:', document.getElementById('timeline-view'));
+
+    // Show loading overlay
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+        console.log('Loading overlay shown');
+    } else {
+        console.log('Loading overlay not found');
+    }
+
+    // Simulate loading time for dramatic effect
+    setTimeout(() => {
+        console.log('Starting to load chat data...');
+        loadChatData();
+    }, 1500);
+
+    setupEventListeners();
+    setupNavigation();
+
+    // Ensure timeline view is active by default
+    switchView('timeline');
+});
+
+
 
 // Display messages
 function displayMessages(messages) {
@@ -636,67 +677,7 @@ function extractDate(timestamp) {
     return match ? match[2] : null;
 }
 
-// Update statistics
-function updateStats() {
-    if (chatData.length === 0) return;
-    
-    // Total messages
-    const totalMessagesEl = document.getElementById('total-messages');
-    if (totalMessagesEl) {
-        totalMessagesEl.textContent = chatData.length.toLocaleString();
-    }
-    
-    // Years of friendship
-    const years = new Set();
-    chatData.forEach(message => {
-        const year = extractYear(message.timestamp);
-        if (year) years.add(year);
-    });
-    
-    const yearsFriendshipEl = document.getElementById('years-friendship');
-    if (yearsFriendshipEl) {
-        yearsFriendshipEl.textContent = years.size;
-    }
-    
-    // Most active year
-    const yearCounts = {};
-    chatData.forEach(message => {
-        const year = extractYear(message.timestamp);
-        if (year) {
-            yearCounts[year] = (yearCounts[year] || 0) + 1;
-        }
-    });
-    
-    const mostActiveYear = Object.keys(yearCounts).reduce((a, b) => 
-        yearCounts[a] > yearCounts[b] ? a : b
-    );
-    
-    const mostActiveYearEl = document.getElementById('most-active-year');
-    if (mostActiveYearEl) {
-        mostActiveYearEl.textContent = mostActiveYear;
-    }
-    
-    // Longest message
-    const longestMessage = chatData.reduce((longest, current) => 
-        current.text.length > longest.text.length ? current : longest
-    );
-    
-    const longestMessageEl = document.getElementById('longest-message');
-    if (longestMessageEl) {
-        longestMessageEl.textContent = longestMessage.text.length.toLocaleString();
-    }
-    
-    // Update sidebar stats
-    const sidebarMessageCountEl = document.getElementById('sidebar-message-count');
-    if (sidebarMessageCountEl) {
-        sidebarMessageCountEl.textContent = chatData.length.toLocaleString();
-    }
-    
-    const sidebarYearCountEl = document.getElementById('sidebar-year-count');
-    if (sidebarYearCountEl) {
-        sidebarYearCountEl.textContent = years.size;
-    }
-}
+
 
 // Generate memories with individual functionality
 function generateMemories() {
@@ -1564,3 +1545,5 @@ function showModal(title, content) {
     
     document.head.appendChild(style);
 } 
+
+ 

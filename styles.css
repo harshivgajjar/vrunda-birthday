@@ -74,8 +74,37 @@ body {
 /* Override Bootstrap defaults */
 .container, .container-fluid {
     max-width: 100%;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Improved responsive breakpoints */
+@media (max-width: 1400px) {
+    .container, .container-fluid {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .container, .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container, .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container, .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
 }
 
 /* Layout Structure */
@@ -815,58 +844,66 @@ body {
 
 /* Analytics View */
 .analytics-page {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
+    padding: 0 1rem;
+    overflow-x: hidden;
 }
 
 .analytics-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     position: relative;
+    padding: 0 1rem;
 }
 
 .analytics-header::before {
     content: '📊 👮‍♂️';
     position: absolute;
-    top: -1rem;
-    right: 2rem;
-    font-size: 2rem;
+    top: -0.5rem;
+    right: 1rem;
+    font-size: 1.5rem;
     opacity: 0.1;
 }
 
 .analytics-header h2 {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    word-wrap: break-word;
 }
 
 .analytics-header p {
     color: var(--secondary-light);
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    word-wrap: break-word;
 }
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    max-width: 100%;
 }
 
 .stat-card {
     background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
-    border-radius: var(--radius-xl);
-    padding: 2rem;
-    border: 3px solid var(--secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 2px solid var(--secondary);
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
+    min-width: 0;
+    word-wrap: break-word;
 }
 
 .stat-card::before {
@@ -875,7 +912,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 4px;
+    height: 3px;
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -890,13 +927,13 @@ body {
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-xl);
 }
 
 .stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: 0.75rem;
     display: block;
 }
 
@@ -905,10 +942,12 @@ body {
 }
 
 .stat-number {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
     font-weight: 800;
     margin-bottom: 0.5rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .stat-card.primary .stat-number { color: var(--primary); }
@@ -918,35 +957,38 @@ body {
 
 .stat-label {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: clamp(0.8rem, 2vw, 1rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    word-wrap: break-word;
 }
 
 .chart-section {
     background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
-    border-radius: var(--radius-xl);
-    border: 3px solid var(--secondary);
-    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--secondary);
+    padding: 1.5rem;
     box-shadow: var(--shadow-xl);
     position: relative;
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .chart-section::before {
     content: '📈 📉';
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 1.25rem;
     opacity: 0.1;
 }
 
 .chart-container h3 {
     color: var(--text-primary);
-    font-size: 1.5rem;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1399,6 +1441,28 @@ body {
     .memories-page {
         max-width: 100%;
     }
+    
+    .analytics-page {
+        padding: 0.75rem;
+    }
+    
+    .analytics-header {
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .chart-section {
+        padding: 1rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1836,6 +1900,28 @@ body {
         padding: 1.25rem;
     }
     
+    .analytics-page {
+        padding: 0.5rem;
+    }
+    
+    .analytics-header {
+        margin-bottom: 1rem;
+        padding: 0 0.25rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .chart-section {
+        padding: 1rem;
+    }
+    
     .search-header h2,
     .analytics-header h2,
     .memories-header h2 {
@@ -2270,4 +2356,123 @@ body {
     --primary-dark: #1e40af;
     --secondary: #dc2626;
     --accent: #059669;
+} 
+
+/* Login Modal Styles */
+#login-modal.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 41, 58, 0.7);
+}
+#login-modal .modal-content {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: 2rem 2rem 1.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+#login-modal .modal-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+#login-modal .form-group {
+    margin-bottom: 1.25rem;
+}
+#login-modal label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+#login-modal input.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    font-size: 1rem;
+    background: var(--surface-light);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+#login-modal .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.75rem 0;
+    transition: background 0.2s;
+}
+#login-modal .btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+}
+#login-error {
+    color: var(--error);
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive login modal */
+@media (max-width: 480px) {
+    #login-modal .modal-content {
+        width: 95%;
+        margin: 1rem auto;
+        max-width: 350px;
+        padding: 1.5rem;
+    }
+    
+    #login-modal .modal-header h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    #login-modal input.form-control {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+    }
+    
+    #login-modal .btn-primary {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    #login-modal .form-group {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    #login-modal .modal-content {
+        width: 98%;
+        margin: 0.5rem auto;
+        padding: 1.25rem;
+    }
+    
+    #login-modal .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    #login-modal input.form-control {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.95rem;
+    }
+    
+    #login-modal .btn-primary {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
 } 
