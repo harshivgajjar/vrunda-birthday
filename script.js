@@ -9,8 +9,8 @@ let isAuthenticated = false;
 
 async function checkAuth() {
     try {
-        // Try domain first, fallback to localhost for development
-        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://happybirthdayvrunda.com';
+        // Use the current domain for API calls (works for both localhost and production)
+        const baseUrl = window.location.origin;
         const res = await fetch(`${baseUrl}/api/check-auth`, {
             credentials: 'include'
         });
@@ -43,7 +43,7 @@ if (loginForm) {
         const errorDiv = document.getElementById('login-error');
         errorDiv.style.display = 'none';
         try {
-            const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://happybirthdayvrunda.com';
+            const baseUrl = window.location.origin;
             const res = await fetch(`${baseUrl}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1584,7 +1584,7 @@ async function loadPhotosGallery() {
         console.log('Attempting to fetch real photos from Google Photos album...');
         
         // First, try to scrape the actual Google Photos album
-        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://happybirthdayvrunda.com';
+        const baseUrl = window.location.origin;
         let response = await fetch(`${baseUrl}/api/photos/scrape`, {
             method: 'GET',
             credentials: 'include',
