@@ -92,6 +92,14 @@ function switchView(viewName) {
             console.log('Displaying timeline messages...');
             displayMessages(filteredData);
             break;
+        case 'photos':
+            console.log('Loading photos gallery...');
+            loadPhotosGallery();
+            break;
+        case 'files':
+            console.log('Loading files repository...');
+            loadFilesRepository();
+            break;
         case 'search':
             // Search view is handled by its own event listeners
             break;
@@ -106,7 +114,9 @@ function updatePageHeader(viewName) {
     const pageTitle = document.querySelector('.page-title');
     const pageSubtitle = document.querySelector('.page-subtitle');
     const titles = {
-        timeline: { title: 'Timeline', subtitle: 'Your chat journey with Vrunda' },
+        timeline: { title: 'Chats', subtitle: 'Your conversation journey together' },
+        photos: { title: 'Photos', subtitle: 'Your shared memories captured in moments' },
+        files: { title: 'Files', subtitle: 'All your shared documents and files' },
         search: { title: 'Search', subtitle: 'Find specific moments in your chat history' },
         memories: { title: 'Memories', subtitle: 'Curated moments from your chat history' }
     };
@@ -183,6 +193,9 @@ async function loadChatData() {
         
         // Generate memories
         generateMemories();
+        
+        // Update sidebar stats
+        updateSidebarStats();
         
         // Hide loading overlay with animation
         if (loadingOverlay) {
@@ -867,8 +880,10 @@ function debounce(func, wait) {
     };
 }
 
-// Add some fun Easter eggs
+// Add some fun Easter eggs (only enabled after authentication)
 document.addEventListener('keydown', function(e) {
+    if (!isAuthenticated) return; // Only work after login
+    
     // Press 'B' for Brooklyn Nine-Nine theme
     if (e.key.toLowerCase() === 'b') {
         document.body.classList.toggle('b99-theme');
@@ -1546,4 +1561,453 @@ function showModal(title, content) {
     document.head.appendChild(style);
 } 
 
- 
+// Global photos data
+let photosData = [];
+
+// Photos Gallery Functions
+async function loadPhotosGallery() {
+    const photosGrid = document.getElementById('photos-grid');
+    if (!photosGrid) return;
+
+    // Show loading state
+    photosGrid.innerHTML = `
+        <div class="photos-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading your photo gallery from Google Photos...</p>
+        </div>
+    `;
+
+    try {
+        console.log('Attempting to fetch real photos from Google Photos album...');
+        
+        // First, try to scrape the actual Google Photos album
+        let response = await fetch('http://localhost:5000/api/photos/scrape', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('Scrape API Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`Scrape API error! status: ${response.status}`);
+        }
+        
+        const scrapeResponse = await response.json();
+        console.log('Scrape API response:', scrapeResponse);
+        
+        if (scrapeResponse.success && scrapeResponse.photos.length > 0) {
+            // Successfully scraped real photos from Google Photos
+            console.log('✅ Successfully loaded REAL photos from Google Photos album!');
+            photosData = scrapeResponse.photos;
+            const photosUrl = scrapeResponse.albumUrl;
+            
+            displayPhotos(photosData);
+            
+            // Add album link
+            const albumLink = document.createElement('div');
+            albumLink.className = 'album-link';
+            albumLink.innerHTML = `
+                <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%); border-radius: var(--radius-lg); border: 2px solid var(--secondary);">
+                    <h3 style="color: white; margin-bottom: 0.5rem;">📸 ${scrapeResponse.albumTitle}</h3>
+                    <p style="color: white; margin-bottom: 1rem; font-size: 0.9rem;">${scrapeResponse.totalPhotos} REAL photos from your Google Photos album • ${scrapeResponse.albumUrl}</p>
+                    <a href="${photosUrl}" target="_blank" style="display: inline-block; background: white; color: var(--primary); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 View Original Album
+                    </a>
+                </div>
+            `;
+            photosGrid.appendChild(albumLink);
+            
+            setupPhotoFilters();
+            return; // Exit early since we got real photos
+        } else {
+            console.log('No real photos found in album');
+            
+            // Show message that no real photos were found
+            photosGrid.innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📸</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--text-primary);">No Photos Found</h3>
+                    <p style="margin-bottom: 2rem;">Could not access photos from your Google Photos album.</p>
+                    <a href="https://photos.app.goo.gl/u8TTaxCNTvoktUCX6" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 View Your Google Photos Album
+                    </a>
+                </div>
+            `;
+            return; // Exit early - no fallback to fake photos
+        }
+
+        displayPhotos(photosData);
+        
+        // Add album link
+        const albumLink = document.createElement('div');
+        albumLink.className = 'album-link';
+        albumLink.innerHTML = `
+            <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%); border-radius: var(--radius-lg); border: 2px solid var(--secondary);">
+                <h3 style="color: white; margin-bottom: 0.5rem;">📸 ${photosResponse.albumTitle}</h3>
+                <p style="color: white; margin-bottom: 1rem; font-size: 0.9rem;">${photosResponse.dateRange} • ${photosResponse.totalPhotos} photos • ${photosResponse.description}</p>
+                <a href="${photosUrl}" target="_blank" style="display: inline-block; background: white; color: var(--primary); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                    🌐 Open in Google Photos
+                </a>
+            </div>
+        `;
+        photosGrid.appendChild(albumLink);
+        
+        // Set up photo search and filters
+        setupPhotoFilters();
+        
+    } catch (error) {
+        console.error('Error loading photos from API:', error);
+        
+        // Show error message - no fallback photos
+        photosGrid.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">❌</div>
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Error Loading Photos</h3>
+                <p style="margin-bottom: 2rem;">Could not access your Google Photos album. Please check your connection and try again.</p>
+                <a href="https://photos.app.goo.gl/u8TTaxCNTvoktUCX6" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                    🌐 View Your Google Photos Album
+                </a>
+            </div>
+        `;
+        
+        console.log('No photos loaded - only real photos are allowed');
+    }
+}
+
+function displayPhotos(photos) {
+    const photosGrid = document.getElementById('photos-grid');
+    if (!photosGrid) return;
+
+    photosGrid.innerHTML = photos.map(photo => `
+        <div class="photo-card" onclick="openPhotoModal('${photo.url}', '${photo.title}')">
+            <img src="${photo.url}" 
+                 alt="${photo.title}" 
+                 class="photo-image"
+                 onerror="this.onerror=null; this.src='${photo.originalUrl || photo.url}'; this.style.opacity='0.7';"
+                 loading="lazy"
+                 onload="this.style.opacity='1';">
+            <div class="photo-info">
+                <div class="photo-title">${photo.title}</div>
+                <div class="photo-date">${photo.date}</div>
+                <div class="photo-size">${photo.size}</div>
+                ${photo.description ? `<div class="photo-description">${photo.description}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function setupPhotoFilters() {
+    const photoSearchInput = document.getElementById('photo-search-input');
+    const photoYearFilter = document.getElementById('photo-year-filter');
+    const photoMonthFilter = document.getElementById('photo-month-filter');
+    const photoSortFilter = document.getElementById('photo-sort-filter');
+
+    if (photoSearchInput) {
+        photoSearchInput.addEventListener('input', debounce(function() {
+            // TODO: Implement photo search
+            console.log('Photo search:', this.value);
+        }, 300));
+    }
+
+    if (photoYearFilter) {
+        photoYearFilter.addEventListener('change', function() {
+            // TODO: Implement year filter
+            console.log('Photo year filter:', this.value);
+        });
+    }
+
+    if (photoMonthFilter) {
+        photoMonthFilter.addEventListener('change', function() {
+            // TODO: Implement month filter
+            console.log('Photo month filter:', this.value);
+        });
+    }
+
+    if (photoSortFilter) {
+        photoSortFilter.addEventListener('change', function() {
+            // TODO: Implement sort filter
+            console.log('Photo sort filter:', this.value);
+        });
+    }
+}
+
+function openPhotoModal(photoUrl, photoTitle) {
+    // Google Photos album URL
+    const photosUrl = 'https://photos.app.goo.gl/u8TTaxCNTvoktUCX6';
+    
+    // Get the photo data to show additional info
+    const photoData = photosData.find(photo => photo.title === photoTitle);
+    
+    showModal('Photo View', `
+        <div style="text-align: center;">
+            <img src="${photoUrl}" 
+                 alt="${photoTitle}" 
+                 style="max-width: 100%; max-height: 70vh; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+                 onerror="this.onerror=null; this.src='${photoData && photoData.originalUrl ? photoData.originalUrl : photoUrl}'; this.style.opacity='0.8';">
+            <h3 style="margin-bottom: 0.5rem;">${photoTitle}</h3>
+            ${photoData ? `
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">
+                    📅 ${photoData.date} • 📏 ${photoData.size}
+                </p>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-style: italic;">
+                    ${photoData.description}
+                </p>
+            ` : ''}
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="${photoUrl}" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                    🔍 View Full Size
+                </a>
+                <a href="${photosUrl}" target="_blank" style="display: inline-block; background: var(--secondary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                    🌐 View Album
+                </a>
+            </div>
+        </div>
+    `);
+}
+
+// Files Repository Functions
+async function loadFilesRepository() {
+    const filesGrid = document.getElementById('files-grid');
+    if (!filesGrid) return;
+
+    // Show loading state
+    filesGrid.innerHTML = `
+        <div class="files-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading your file repository from Google Drive...</p>
+        </div>
+    `;
+
+    try {
+        // Google Drive Folder URL
+        const driveUrl = 'https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing';
+        
+        // Real files from the Google Drive folder
+        const driveFiles = [
+            {
+                id: 1,
+                name: '10th Board Computer Notes',
+                type: 'document',
+                size: '—',
+                date: '1:08 PM',
+                icon: '📚',
+                description: 'Study materials and notes'
+            },
+            {
+                id: 2,
+                name: 'BDAY BOO MOO.pdf',
+                type: 'document',
+                size: '28 KB',
+                date: '1:09 PM',
+                icon: '📄',
+                description: 'Birthday celebration document'
+            },
+            {
+                id: 3,
+                name: 'Birthday Letter | Harshiv',
+                type: 'document',
+                size: '2 KB',
+                date: '1:09 PM',
+                icon: '💌',
+                description: 'Special birthday letter'
+            },
+            {
+                id: 4,
+                name: 'Deep dive into the nostalgic ocean.mp4',
+                type: 'video',
+                size: '13.5 MB',
+                date: '1:09 PM',
+                icon: '🌊',
+                description: 'Nostalgic video memories'
+            },
+            {
+                id: 5,
+                name: 'moo buday.mp4',
+                type: 'video',
+                size: '969 KB',
+                date: '1:09 PM',
+                icon: '🎂',
+                description: 'Birthday celebration video'
+            },
+            {
+                id: 6,
+                name: 'YOU LITTLE MIDGET!',
+                type: 'other',
+                size: '—',
+                date: 'Jul 18, 2020',
+                icon: '🎯',
+                description: 'Fun memory or inside joke'
+            }
+        ];
+
+        displayFiles(driveFiles);
+        
+        // Add drive folder link
+        const driveLink = document.createElement('div');
+        driveLink.className = 'drive-link';
+        driveLink.innerHTML = `
+            <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%); border-radius: var(--radius-lg); border: 2px solid var(--primary);">
+                <h3 style="color: white; margin-bottom: 0.5rem;">📁 View Full Folder</h3>
+                <p style="color: white; margin-bottom: 1rem; font-size: 0.9rem;">Shared by Harshiv Gajjar • Last modified: Today</p>
+                <a href="${driveUrl}" target="_blank" style="display: inline-block; background: white; color: var(--secondary); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                    🌐 Open in Google Drive
+                </a>
+            </div>
+        `;
+        filesGrid.appendChild(driveLink);
+        
+        // Set up file search and filters
+        setupFileFilters();
+        
+    } catch (error) {
+        console.error('Error loading files:', error);
+        filesGrid.innerHTML = `
+            <div class="files-loading">
+                <p>Error loading files. Please check your Google Drive link.</p>
+                <a href="https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing" target="_blank" style="color: var(--secondary); text-decoration: none; margin-top: 1rem; display: inline-block;">
+                    🌐 Open Google Drive Folder
+                </a>
+            </div>
+        `;
+    }
+}
+
+function displayFiles(files) {
+    const filesGrid = document.getElementById('files-grid');
+    if (!filesGrid) return;
+
+    filesGrid.innerHTML = files.map(file => `
+        <div class="file-card" onclick="downloadFile('${file.name}', '${file.type}')">
+            <div class="file-icon">${file.icon}</div>
+            <div class="file-info">
+                <div class="file-name">${file.name}</div>
+                <div class="file-meta">
+                    <span class="file-size">${file.size}</span>
+                    <span class="file-date">${file.date}</span>
+                </div>
+                ${file.description ? `<div class="file-description">${file.description}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function setupFileFilters() {
+    const fileSearchInput = document.getElementById('file-search-input');
+    const fileTypeFilter = document.getElementById('file-type-filter');
+    const fileSortFilter = document.getElementById('file-sort-filter');
+
+    if (fileSearchInput) {
+        fileSearchInput.addEventListener('input', debounce(function() {
+            // TODO: Implement file search
+            console.log('File search:', this.value);
+        }, 300));
+    }
+
+    if (fileTypeFilter) {
+        fileTypeFilter.addEventListener('change', function() {
+            // TODO: Implement type filter
+            console.log('File type filter:', this.value);
+        });
+    }
+
+    if (fileSortFilter) {
+        fileSortFilter.addEventListener('change', function() {
+            // TODO: Implement sort filter
+            console.log('File sort filter:', this.value);
+        });
+    }
+}
+
+function downloadFile(fileName, fileType) {
+    // Create file viewer modal
+    let fileContent = '';
+    let fileIcon = '📄';
+    
+    // Set appropriate icon and content based on file type
+    switch(fileType) {
+        case 'document':
+            fileIcon = '📄';
+            fileContent = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${fileIcon}</div>
+                    <h3 style="margin-bottom: 1rem;">${fileName}</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">This is a document file. To view or download, please use the link below.</p>
+                    <a href="https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 Open in Google Drive
+                    </a>
+                </div>
+            `;
+            break;
+        case 'video':
+            fileIcon = '🎥';
+            fileContent = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${fileIcon}</div>
+                    <h3 style="margin-bottom: 1rem;">${fileName}</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">This is a video file. To view or download, please use the link below.</p>
+                    <a href="https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 Open in Google Drive
+                    </a>
+                </div>
+            `;
+            break;
+        case 'audio':
+            fileIcon = '🎵';
+            fileContent = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${fileIcon}</div>
+                    <h3 style="margin-bottom: 1rem;">${fileName}</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">This is an audio file. To listen or download, please use the link below.</p>
+                    <a href="https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 Open in Google Drive
+                    </a>
+                </div>
+            `;
+            break;
+        default:
+            fileIcon = '📁';
+            fileContent = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${fileIcon}</div>
+                    <h3 style="margin-bottom: 1rem;">${fileName}</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">This is a file. To view or download, please use the link below.</p>
+                    <a href="https://drive.google.com/drive/folders/1REKHn4UByIiV_ZpbM_HcDK6JT-Vrak4v?usp=sharing" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.2s ease;">
+                        🌐 Open in Google Drive
+                    </a>
+                </div>
+            `;
+    }
+    
+    // Show file in modal
+    showModal(`File: ${fileName}`, fileContent);
+    
+    console.log('Opening file in modal:', fileName, 'Type:', fileType);
+}
+
+// Update sidebar statistics
+function updateSidebarStats() {
+    const messageCountElement = document.getElementById('sidebar-message-count');
+    const yearCountElement = document.getElementById('sidebar-year-count');
+    
+    if (messageCountElement && chatData.length > 0) {
+        messageCountElement.textContent = chatData.length.toLocaleString();
+    }
+    
+    if (yearCountElement && chatData.length > 0) {
+        // Calculate unique years from chat data
+        const years = new Set();
+        chatData.forEach(message => {
+            if (message.timestamp) {
+                const year = extractYear(message.timestamp);
+                if (year) years.add(year);
+            }
+        });
+        yearCountElement.textContent = years.size;
+    }
+}
+
+// TODO: Add Google Photos and Google Drive API integration functions
+// These will be implemented once you provide the actual links

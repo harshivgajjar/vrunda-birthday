@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vrunda's Memory Lane 🚔👮🎭</title>
+    <title>Harshiv & Vrunda Server 💕🚔👮🎭</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -15,10 +15,10 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <span class="logo-icon">🚔</span>
-                <span class="logo-text">Vrunda's</span>
+                <span class="logo-icon">💕</span>
+                <span class="logo-text">Harshiv & Vrunda</span>
             </div>
-            <div class="logo-subtitle">Memory Lane</div>
+            <div class="logo-subtitle">Digital Memory Server</div>
             <button class="sidebar-close" id="sidebar-close">
                 <span class="close-icon">✕</span>
             </button>
@@ -26,8 +26,16 @@
         
         <nav class="sidebar-nav">
             <a href="#timeline" class="nav-item active" data-view="timeline">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">Timeline</span>
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Chats</span>
+            </a>
+            <a href="#photos" class="nav-item" data-view="photos">
+                <span class="nav-icon">📸</span>
+                <span class="nav-label">Photos</span>
+            </a>
+            <a href="#files" class="nav-item" data-view="files">
+                <span class="nav-icon">📁</span>
+                <span class="nav-label">Files</span>
             </a>
             <a href="#search" class="nav-item" data-view="search">
                 <span class="nav-icon">🔍</span>
@@ -67,8 +75,8 @@
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <span class="menu-icon">☰</span>
                 </button>
-                <h1 class="page-title">Timeline</h1>
-                <p class="page-subtitle">Your chat journey with Vrunda</p>
+                <h1 class="page-title">Chats</h1>
+                <p class="page-subtitle">Your conversation journey together</p>
             </div>
             <div class="header-right">
                 <button class="random-btn" id="random-memory">
@@ -80,13 +88,13 @@
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Timeline View -->
+            <!-- Chats View -->
             <section id="timeline-view" class="content-section active">
                 <div class="container-fluid">
                     <!-- Filters Bar -->
                     <div class="filters-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" placeholder="Search memories..." class="search-input">
+                            <input type="text" id="search-input" placeholder="Search chats..." class="search-input">
                             <span class="search-icon">🔍</span>
                         </div>
                         <div class="filter-group">
@@ -110,6 +118,90 @@
                     <div class="messages-area">
                         <div id="messages-container" class="messages-container">
                             <!-- Messages will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photos View -->
+            <section id="photos-view" class="content-section">
+                <div class="container">
+                    <div class="photos-page">
+                        <div class="photos-header">
+                            <h2>📸 Photo Gallery</h2>
+                            <p>Your shared memories captured in moments</p>
+                        </div>
+                        
+                        <div class="photos-controls">
+                            <div class="search-container large">
+                                <input type="text" id="photo-search-input" placeholder="Search photos..." class="search-input">
+                                <span class="search-icon">🔍</span>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <select id="photo-year-filter" class="filter-select">
+                                    <option value="">All Years</option>
+                                </select>
+                                <select id="photo-month-filter" class="filter-select">
+                                    <option value="">All Months</option>
+                                </select>
+                                <select id="photo-sort-filter" class="filter-select">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="photos-grid" id="photos-grid">
+                            <!-- Photos will be loaded here from Google Photos -->
+                            <div class="photos-loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading your photo gallery...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Files View -->
+            <section id="files-view" class="content-section">
+                <div class="container">
+                    <div class="files-page">
+                        <div class="files-header">
+                            <h2>📁 File Repository</h2>
+                            <p>All your shared documents and files</p>
+                        </div>
+                        
+                        <div class="files-controls">
+                            <div class="search-container large">
+                                <input type="text" id="file-search-input" placeholder="Search files..." class="search-input">
+                                <span class="search-icon">🔍</span>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <select id="file-type-filter" class="filter-select">
+                                    <option value="">All Types</option>
+                                    <option value="document">Documents</option>
+                                    <option value="image">Images</option>
+                                    <option value="video">Videos</option>
+                                    <option value="audio">Audio</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <select id="file-sort-filter" class="filter-select">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="name">Name A-Z</option>
+                                    <option value="size">Size</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="files-grid" id="files-grid">
+                            <!-- Files will be loaded here from Google Drive -->
+                            <div class="files-loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading your file repository...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
